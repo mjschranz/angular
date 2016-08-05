@@ -42,6 +42,12 @@ describe('createUrlTree', () => {
     expect(params[1].path).toEqual('11');
   });
 
+  it('should support first segments contaings slashes', () => {
+    const p = serializer.parse('/');
+    const t = createRoot(p, [{segmentPath: '/one'}, 'two/three']);
+    expect(serializer.serialize(t)).toEqual('/%2Fone/two%2Fthree');
+  });
+
   it('should preserve secondary segments', () => {
     const p = serializer.parse('/a/11/b(right:c)');
     const t = createRoot(p, ['/a', 11, 'd']);
@@ -98,7 +104,7 @@ describe('createUrlTree', () => {
 
   it('should create matrix parameters together with other segments', () => {
     const p = serializer.parse('/a');
-    const t = createRoot(p, ['/a', '/b', {aa: 22, bb: 33}]);
+    const t = createRoot(p, ['/a', 'b', {aa: 22, bb: 33}]);
     expect(serializer.serialize(t)).toEqual('/a/b;aa=22;bb=33');
   });
 
