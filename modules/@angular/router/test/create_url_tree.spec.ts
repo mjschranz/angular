@@ -54,6 +54,12 @@ describe('createUrlTree', () => {
     expect(serializer.serialize(t)).toEqual('/a/11/d(right:c)');
   });
 
+  it('should support updating secondary segments (absolute)', () => {
+    const p = serializer.parse('/a(right:b)');
+    const t = createRoot(p, ['/', {outlets: {right: ['c']}}]);
+    expect(serializer.serialize(t)).toEqual('/a(right:c)');
+  });
+
   it('should support updating secondary segments', () => {
     const p = serializer.parse('/a(right:b)');
     const t = createRoot(p, [{outlets: {right: ['c', 11, 'd']}}]);
@@ -64,6 +70,12 @@ describe('createUrlTree', () => {
     const p = serializer.parse('/a/(b//right:c)');
     const t = createRoot(p, ['a', {outlets: {right: ['d', 11, 'e']}}]);
     expect(serializer.serialize(t)).toEqual('/a/(b//right:d/11/e)');
+  });
+
+  it('should throw when outlets is not the last command', () => {
+    const p = serializer.parse('/a');
+    expect(() => createRoot(p, ['a', {outlets: {right: ['c']}}, 'c']))
+        .toThrowError('{outlets:{}} has to be the last command');
   });
 
   it('should support updating using a string', () => {
@@ -182,6 +194,12 @@ describe('createUrlTree', () => {
       expect(() => create(p.root.children[PRIMARY_OUTLET], 0, p, ['../../']))
           .toThrowError('Invalid number of \'../\'');
     });
+
+    it('should support updating secondary segments', () => {
+      const p = serializer.parse('/a/b');
+      const t = create(p.root.children[PRIMARY_OUTLET], 1, p, [{outlets: {right: ['c']}}]);
+      expect(serializer.serialize(t)).toEqual('/a/b/(right:c)');
+    });
   });
 
   it('should set query params', () => {
@@ -202,7 +220,6 @@ describe('createUrlTree', () => {
     expect(t.fragment).toEqual('fragment');
   });
 });
-
 
 function createRoot(tree: UrlTree, commands: any[], queryParams?: Params, fragment?: string) {
   const s = new ActivatedRouteSnapshot(
